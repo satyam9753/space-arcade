@@ -36,7 +36,7 @@ fontGameOver = pygame.font.Font('font/Fidalga-Regular.ttf', 64)
 textX = 10
 textY =10
 
-#ENEMY
+#SMALL ENEMY
 numberEnemies = 8
 enemy_img = []
 enemyX = []
@@ -53,6 +53,12 @@ for i in range(numberEnemies):
     enemyX_change.append(1)
     enemyY_change.append(32)
 
+#BIG ENEMY
+big_enemy_img = pygame.image.load(('images/alien_big.png'))
+big_enemyX = random.randint(0,730)
+big_enemyY = random.randint(50,90)
+big_enemyX_change = 1.5
+big_enemyY_change = 32
 
 #BULLET
 #'hidden': bullet not visible
@@ -75,6 +81,9 @@ def player(x, y):
 def enemy(x, y, i):
     screen.blit(enemy_img[i], (x,y))
 
+def big_enemy(x,y):
+    screen.blit(big_enemy_img, (x,y))
+
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = "visible"
@@ -85,6 +94,14 @@ def collision(enemyX, enemyY, bulletX, bulletY):
     
     distance_between_enemy_bullet = sqrt(pow((enemyX - bulletX), 2) + pow((enemyY - bulletY), 2))
     if (distance_between_enemy_bullet < 25):
+        return True
+    else:
+        return False
+
+def big_collision(big_enemyX, big_enemyY, bulletX, bulletY):
+    
+    distance_between_enemy_bullet = sqrt(pow((big_enemyX - bulletX), 2) + pow((big_enemyY - bulletY), 2))
+    if (distance_between_enemy_bullet < 40):
         return True
     else:
         return False
@@ -149,7 +166,7 @@ while flag:
             enemyX_change[i] = -(1 + (playerScore/50))
             enemyY[i] += enemyY_change[i]
 
-            #collision
+        #collision with small enemy
         collide = collision(enemyX[i], enemyY[i], bulletX, bulletY)
         if collide == True:
             enemyX[i] = random.randint(0,730)
@@ -158,8 +175,31 @@ while flag:
             bullet_state = "hidden"
             playerScore += 1
         
-        enemy(enemyX[i], enemyY[i], i)
+        #collision with big enemy
+        collide_big = big_collision(big_enemyX, big_enemyY, bulletX, bulletY)
+        if collide_big == True:
+            bulletY = 480
+            bullet_state = "hidden"
+            playerScore += 5
 
+        enemy(enemyX[i], enemyY[i], i)
+    
+    #big enemy motion
+    big_enemyX += big_enemyX_change
+        
+    if big_enemyX < 0:
+        big_enemyX_change = 1 + (playerScore/20)
+        big_enemyY += big_enemyY_change
+    elif big_enemyX >= 736:
+        big_enemyX_change = -(1 + (playerScore/20))
+        big_enemyY += big_enemyY_change
+
+    if big_enemyY >250:
+        big_enemyY == 2000
+
+    if (playerScore > 4):
+        if (playerScore % 5 == 0):
+            big_enemy(big_enemyX, big_enemyY) 
 
     #bullet movement
     if bulletY <= 0:
