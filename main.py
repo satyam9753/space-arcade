@@ -37,7 +37,7 @@ textX = 10
 textY =10
 
 #SMALL ENEMY
-numberEnemies = 8
+numberEnemies = 6
 enemy_img = []
 enemyX = []
 enemyY = []
@@ -151,9 +151,10 @@ while flag:
     for i in range(numberEnemies):
 
         #GAME---OVER
-        if enemyY[i] > 430:
+        if (enemyY[i] > 430) or (big_enemyY > 430) :
             for j in range(1,numberEnemies):
-                enemyY[j] == 5000 ##That's all folks :)
+                enemyY[j] = 5000 ##That's all folks :)
+            big_enemyY = 5000
             gameOver()
             break
 
@@ -194,8 +195,6 @@ while flag:
         big_enemyX_change = -(1 + (playerScore/20))
         big_enemyY += big_enemyY_change
 
-    if big_enemyY >250:
-        big_enemyY == 2000
 
     if (playerScore > 4):
         if (playerScore % 5 == 0):
