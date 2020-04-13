@@ -27,7 +27,7 @@ pygame.display.set_icon(logo)
 player_img = pygame.image.load('images/jet.png')
 playerX = 370
 playerY = 450
-playerX_change = 0.3
+playerX_change = 0.2
 
 #player_score
 playerScore = 0
@@ -35,6 +35,10 @@ fontScore = pygame.font.Font('font/GRNORCH.ttf', 40)
 fontGameOver = pygame.font.Font('font/Fidalga-Regular.ttf', 64)
 textX = 10
 textY =10
+
+#ADDITIONAL FEATURES
+explosion_img = pygame.image.load('images/explosion.png')
+big_explosion_img = pygame.image.load('images/big_explosion.png')
 
 #SMALL ENEMY
 numberEnemies = 6
@@ -55,10 +59,10 @@ for i in range(numberEnemies):
 
 #BIG ENEMY
 big_enemy_img = pygame.image.load(('images/alien_big.png'))
-big_enemyX = random.randint(0,730)
-big_enemyY = random.randint(50,90)
-big_enemyX_change = 1.5
-big_enemyY_change = 32
+big_enemyX = 0
+big_enemyY = 0
+big_enemyX_change = 1
+big_enemyY_change = 30
 
 #BULLET
 #'hidden': bullet not visible
@@ -70,10 +74,25 @@ bulletX_change = 0
 bulletY_change = 3.5
 bullet_state = "hidden"
 
+#BOMB
+bomb_img = pygame.image.load('images/bomb.png')
+bombX = 0
+bombY = 0 
+bombX_CHANGE = 0
+bombY_CHANGE = 20
+
 def showScore(x, y):
     score = fontScore.render("Your Score:  " + str(playerScore), True, (0,255,25))
     screen.blit(score, (x,y))
 
+def showExplosion(x, y):
+    screen.blit(explosion_img, (x,y))
+
+def big_showExplosion(x, y):
+    screen.blit(big_explosion_img, (x,y))
+
+def bomb(x, y):
+    screen.blit(bomb_img, (x,y))
 
 def player(x, y):
     screen.blit(player_img, (x,y)) # 'blit' means to draw
@@ -84,11 +103,13 @@ def enemy(x, y, i):
 def big_enemy(x,y):
     screen.blit(big_enemy_img, (x,y))
 
+def showBomb(x,y):
+    screen.blit(bomb_img, (x,y))
+
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = "visible"
     screen.blit(bullet_img, (x+16, y-40))
-
 
 def collision(enemyX, enemyY, bulletX, bulletY):
     
@@ -106,6 +127,13 @@ def big_collision(big_enemyX, big_enemyY, bulletX, bulletY):
     else:
         return False
 
+def bomb_attack(bombX, bombY, playerX, playerY):
+    
+    distance_between_player2bomb = sqrt(pow((bombX - playerX), 2) + pow((bombY - playerY), 2))
+    if (distance_between_player2bomb < 40):
+        return True
+    else:
+        return False
 
 def gameOver():
     over = fontGameOver.render("GAME OVER :(" + str(playerScore), True, (0,255,25))
@@ -151,7 +179,7 @@ while flag:
     for i in range(numberEnemies):
 
         #GAME---OVER
-        if (enemyY[i] > 430) or (big_enemyY > 430) :
+        if ((enemyY[i] > 430) or (big_enemyY > 430) or (bomb_attack(bombX, bombY, playerX, playerY) == True)) :
             for j in range(1,numberEnemies):
                 enemyY[j] = 5000 ##That's all folks :)
             big_enemyY = 5000
@@ -170,6 +198,7 @@ while flag:
         #collision with small enemy
         collide = collision(enemyX[i], enemyY[i], bulletX, bulletY)
         if collide == True:
+            showExplosion(enemyX[i], enemyY[i])
             enemyX[i] = random.randint(0,730)
             enemyY[i] = random.randint(50,150)
             bulletY = 480
@@ -179,6 +208,9 @@ while flag:
         #collision with big enemy
         collide_big = big_collision(big_enemyX, big_enemyY, bulletX, bulletY)
         if collide_big == True:
+            big_showExplosion(big_enemyX, big_enemyY)
+            big_enemyX = random.randint(0,700)
+            big_enemyY = 50
             bulletY = 480
             bullet_state = "hidden"
             playerScore += 5
@@ -199,6 +231,14 @@ while flag:
     if (playerScore > 4):
         if (playerScore % 5 == 0):
             big_enemy(big_enemyX, big_enemyY) 
+
+        bombY = 15
+        bombX = random.randint(5,720)
+        #k = random.randint(3,7)
+        if(playerScore % 3 == 0):
+            showBomb(bombX, bombY)
+
+    bombY += bombY_CHANGE
 
     #bullet movement
     if bulletY <= 0:
